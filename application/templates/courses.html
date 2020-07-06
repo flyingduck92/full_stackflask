@@ -1,0 +1,46 @@
+    {% extends "layout.html" %}
+    
+    {% block content %}
+    <h1>Course Offerings</h1>
+
+    <!--  Display the Term and Year here --->
+    <h3>Term: {{ term }}</h3>
+
+    <div>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">Course ID</th>
+                <th scope="col">Title</th>
+                <th scope="col">Description</th>
+                <th scope="col">Credits</th>
+                <th scope="col">Term</th>
+                <th scope="col">Enroll</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <!-- Construct the rest of courses here -->
+            {% for course in coursesData %}
+            <tr>
+                <td scope='row'>{{ course['courseID'] }}</td>
+                <td>{{ course['title'] }}</td>
+                <td>{{ course['description'] }}</td>
+                <td>{{ course['credits'] }}</td>
+                <td>{{ course['term'] }}</td>
+                <td>
+                    <form action="{{ url_for('enrollment') }}" method="POST">
+                        <input type="hidden" name="courseID" value="{{ course['courseID'] }}">
+                        <input type="hidden" name="title" value="{{ course['title'] }}">
+                        <input type="hidden" name="term" value="{{ course['term'] }}">
+                        <button>Enroll</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
