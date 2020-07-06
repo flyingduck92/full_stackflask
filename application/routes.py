@@ -8,6 +8,7 @@ from flask_restplus import Resource
 
 ############################################################
 
+# via localhost:5000/v1/api
 @api.route('/api','/api/')
 class GetAndPost(Resource):
 	''' Get All '''
