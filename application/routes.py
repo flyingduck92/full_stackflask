@@ -1,24 +1,65 @@
-from application import app, db
-# from application import api
+from application import app, db, api
 from flask import render_template, request, json, Response, redirect, flash, url_for, session, jsonify
 from application.models import User, Course, Enrollment
 from application.forms import LoginForm, RegisterForm
 from application.courselist import course_list
 
-# from flask_restplus import Resource
-# from flask_restx import Resource
+from flask_restplus import Resource
 
-coursesData = [
-	{"courseID":"1111","title":"PHP 101","description":"Intro to PHP","credits":3,"term":"Fall, Spring"}, 
-	{"courseID":"2222","title":"Java 1","description":"Intro to Java Programming","credits":4,"term":"Spring"}, 
-	{"courseID":"3333","title":"Adv PHP 201","description":"Advanced PHP Programming","credits":3,"term":"Fall"}, 
-	{"courseID":"4444","title":"Angular 1","description":"Intro to Angular","credits":3,"term":"Fall, Spring"}, 
-	{"courseID":"5555","title":"Java 2","description":"Advanced Java Programming","credits":4,"term":"Fall"}
-]
+############################################################
+
+@api.route('/api','/api/')
+class GetAndPost(Resource):
+	''' Get All '''
+	def get(self):
+		return jsonify(User.objects.all())
+
+	''' POST '''
+	def post(self):
+		data 		= api.payload
+		user_id 	= data['user_id']
+		email 		= data['email']
+		first_name 	= data['first_name']
+		last_name 	= data['last_name']
+		password 	= data['password']
+
+		user = User(user_id=user_id, email=email, first_name=first_name, last_name=last_name)
+		user.set_password(password)
+		user.save() 
+		return jsonify(User.objects(user_id=user_id))
+
+@api.route('/api/<idx>')
+class GetUpdateDelete(Resource):
+	''' Get One '''
+	def get(self, idx):
+		return jsonify(User.objects(user_id=idx))
+
+	''' Put '''
+	def put(self, idx):
+		data = api.payload 
+		User.objects(user_id=idx).update(**data)
+
+		return jsonify(User.objects(user_id=idx))
+
+	''' Delete '''
+	def delete(self, idx):
+		data = api.payload
+		User.objects(user_id=idx).delete()
+		return jsonify('User deleted!')
+
+############################################################
+
+# coursesData = [
+# 	{"courseID":"1111","title":"PHP 101","description":"Intro to PHP","credits":3,"term":"Fall, Spring"}, 
+# 	{"courseID":"2222","title":"Java 1","description":"Intro to Java Programming","credits":4,"term":"Spring"}, 
+# 	{"courseID":"3333","title":"Adv PHP 201","description":"Advanced PHP Programming","credits":3,"term":"Fall"}, 
+# 	{"courseID":"4444","title":"Angular 1","description":"Intro to Angular","credits":3,"term":"Fall, Spring"}, 
+# 	{"courseID":"5555","title":"Java 2","description":"Advanced Java Programming","credits":4,"term":"Fall"}
+# ]
 
 @app.route('/')
-@app.route('/home')
 @app.route('/index')
+@app.route('/home')
 def index():
 	return render_template('index.html', index=True)
 
@@ -170,45 +211,3 @@ def user():
 
 	return render_template('user.html', users=users)
 
-############################################################
-
-# @api.route('/api','/api/')
-# class GetAndPost(Resource):
-# 	''' Get All '''
-# 	def get(self):
-# 		return jsonify(User.objects.all())
-
-# 	''' POST '''
-# 	def post(self):
-# 		data 		= api.payload
-# 		user_id 	= data['user_id']
-# 		email 		= data['email']
-# 		first_name 	= data['first_name']
-# 		last_name 	= data['last_name']
-# 		password 	= data['password']
-
-# 		user = User(user_id=user_id, email=email, first_name=first_name, last_name=last_name)
-# 		user.set_password(password)
-# 		user.save() 
-# 		return jsonify(User.objects(user_id=user_id))
-
-# @api.route('/api/<idx>')
-# class GetUpdateDelete(Resource):
-# 	''' Get One '''
-# 	def get(self, idx):
-# 		return jsonify(User.objects(user_id=idx))
-
-# 	''' Put '''
-# 	def put(self, idx):
-# 		data = api.payload 
-# 		User.objects(user_id=idx).update(**data)
-
-# 		return jsonify(User.objects(user_id=idx))
-
-# 	''' Delete '''
-# 	def delete(self, idx):
-# 		data = api.payload
-# 		User.objects(user_id=idx).delete()
-# 		return jsonify('User deleted!')
-
-############################################################
