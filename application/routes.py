@@ -2,7 +2,6 @@ from application import app, db, api
 from flask import render_template, request, json, Response, redirect, flash, url_for, session, jsonify
 from application.models import User, Course, Enrollment
 from application.forms import LoginForm, RegisterForm
-from application.courselist import course_list
 
 from flask_restplus import Resource
 
@@ -172,7 +171,42 @@ def enrollment():
 			enrollment.save()
 			flash(f"You're enrolled in { courseTitle }!","success")
 	
-	classes = course_list()
+	classes = list(User.objects.aggregate(*[
+				{
+					'$lookup': {
+						'from': 'enrollment', 
+						'localField': 'user_id', 
+						'foreignField': 'user_id', 
+						'as': 'r1'
+					}
+				}, {
+					'$unwind': {
+						'path': '$r1', 
+						'includeArrayIndex': 'r1_id', 
+						'preserveNullAndEmptyArrays': False
+					}
+				}, {
+					'$lookup': {
+						'from': 'course', 
+						'localField': 'r1.courseID', 
+						'foreignField': 'courseID', 
+						'as': 'r2'
+					}
+				}, {
+					'$unwind': {
+						'path': '$r2', 
+						'preserveNullAndEmptyArrays': False
+					}
+				}, {
+					'$match': {
+						'user_id': user_id
+					}
+				}, {
+					'$sort': {
+						'r2.courseID': 1
+					}
+				}
+			]))
 
 	# classes = list(Course.objects.aggregate(*[
 	# 		{
